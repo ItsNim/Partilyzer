@@ -51,7 +51,7 @@ The PMS5003S is a laser-based particulate matter sensor. Its primary function is
 | **Pressure** | 300 to 1100 hPa | ±0.12 hPa | 0.18 Pa |
 | **Gas/VOCs** | N/A | Variable* | 0.083 to 3.2 kΩ (depending on measurement) |
 
-*Note on Gas Measurement:* The gas sensor measures the change in resistance of a metal-oxide layer, which correlates to the concentration of Volatile Organic Compounds (VOCs) and other gases. The output is a raw resistance value in Ohms. To get a meaningful air quality index (IAQ), this value must be processed using the **Bosch Sensortec Environmental Cluster (BSEC) software library**. Therefore, it does not have a simple, single accuracy metric like the other sensors.
+*Note on Gas Measurement:* The gas sensor measures the change in resistance of a metal-oxide layer, which correlates to the concentration of Volatile Organic Compounds (VOCs) and other gases. The output is a raw resistance value in Ohms. To get a meaningful air quality index (AQI), this value must be processed using the **Bosch Sensortec Environmental Cluster (BSEC) software library**. Therefore, it does not have a simple, single accuracy metric like the other sensors.
 
 ** Note: The interface is selected by the CSB pin: tie CSB to VDDIO and it’s in I²C mode; pull CSB low and it latches into SPI until the next power-on reset. 
 
@@ -95,7 +95,7 @@ In I²C mode the address is 0x76 (SDO=GND) or 0x77 (SDO=VDDIO); don’t leave SD
 
 ***
 
-*\*Note: The ST7789 controller operates at 3.3V, but most breakout boards include a voltage regulator, allowing them to be powered by a 5V supply from popular microcontrollers like the Arduino UNO. The backlight (`LEDA` or `BL`) may also have a separate pin and require its own resistor or power source depending on the board's design.*
+*\*Note: The ST7789 controller operates at 3.3V, but most breakout boards include a voltage regulator, allowing them to be powered by a 5V supply from popular microcontrollers like the Arduino UNO. The backlight I was able to power by pulling it high, but this board also had a pin to control it.
 
 ## Microcontroller ##
 ![PXL_20250824_142132725](https://github.com/user-attachments/assets/951713b7-07e2-40e1-a76e-562393f2d2a4)
