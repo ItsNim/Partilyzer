@@ -69,6 +69,7 @@ In I²C mode the address is 0x76 (SDO=GND) or 0x77 (SDO=VDDIO); don’t leave SD
 
 ###SCD40 / SCD41
 ![PXL_20250824_142122595 MP](https://github.com/user-attachments/assets/33b3c144-8969-4604-acb5-75a595558ca0)
+[Sensirion_CO2_Sensors_SCD4x_design-in_guide.pdf](https://github.com/user-attachments/files/21957576/Sensirion_CO2_Sensors_SCD4x_design-in_guide.pdf)
 
 | Specification             | SCD40                         | SCD41                         |
 | :------------------------ | :---------------------------- | :---------------------------- |
