@@ -4,8 +4,6 @@ Place holder
 
 ### Environmental Sensor Summary
 
-This table provides a high-level comparison of the sensors discussed, highlighting their primary function and measurement technology.
-
 | Sensor Model      | Primary Measurement(s)            | Measurement Principle       | Key Feature / Distinction                                       |
 | :---------------- | :-------------------------------- | :-------------------------- | :-------------------------------------------------------------- |
 | **PMS5003S** | Particulate Matter (PM1.0, 2.5, 10) | Laser Scattering            | Measures physical particle/dust concentration in the air.       |
@@ -15,8 +13,6 @@ This table provides a high-level comparison of the sensors discussed, highlighti
 | **SCD41** | Carbon Dioxide (CO₂), Temp, Humidity | NDIR (Photoacoustic)        | Direct CO₂ measurement with **higher accuracy** and a wider range than the SCD40. |
 
 ### Sensor Interface & Pinout Summary
-
-This table details the communication protocols and essential pins for the sensors discussed. Note that pin names and operating voltages can vary slightly depending on the specific breakout board manufacturer.
 
 | Sensor           | Interface(s) | Key Pins                                                                         | Typical Voltage* |
 | :--------------- | :----------- | :------------------------------------------------------------------------------- | :--------------- |
@@ -74,8 +70,6 @@ In I²C mode the address is 0x76 (SDO=GND) or 0x77 (SDO=VDDIO); don’t leave SD
 ###SCD40 / SCD41
 ![PXL_20250824_142122595 MP](https://github.com/user-attachments/assets/33b3c144-8969-4604-acb5-75a595558ca0)
 
-This table outlines the key performance differences between the Sensirion SCD40 and SCD41 CO₂ sensors. While they share the same NDIR technology, the SCD41 offers a wider specified measurement range and higher accuracy.
-
 | Specification             | SCD40                         | SCD41                         |
 | :------------------------ | :---------------------------- | :---------------------------- |
 | **CO₂ Specified Range** | 400 - 2000 ppm                | 400 - 5000 ppm                |
@@ -94,7 +88,6 @@ This table outlines the key performance differences between the Sensirion SCD40 
 ### 2.4 TFT 240*320, ST7789
 ![PXL_20250824_142115152](https://github.com/user-attachments/assets/6474979e-0ac7-46bd-aea0-94cc6ba3e594)
 
-This table outlines the specifications for a typical 2.4-inch TFT display module that uses the ST7789 controller, a common driver known for its high-resolution capabilities on small screens.
 
 | Display Type | Controller | Resolution | Interface(s) | Key Pins                                 | Typical Voltage* |
 | :--- | :--- | :--- | :--- | :--- | :--- |
