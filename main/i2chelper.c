@@ -2,6 +2,10 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <stdio.h>
+#include "bme68x_defs.h"
+#include "bme68x.h"
+
+
 // Local log tag
 
 // ------- ENS160 register map -------
@@ -30,6 +34,17 @@
 static const char *TAG_ENS160 = "ENS160";
 static const char *TAG_SCD40  = "SCD40";
 
+// BME68X device structure
+static struct bme68x_dev bme68x_dev;
+
+// BME68X configuration structure
+static struct bme68x_conf conf;
+
+// BME68X heater configuration structure
+static struct bme68x_heatr_conf heatr_conf;
+
+// BME68X data structure
+static struct bme68x_data data;
 
 esp_err_t i2c_helper_init(void) {
     i2c_config_t conf = {
@@ -296,15 +311,81 @@ static esp_err_t scd40_wake(void) {
     return ESP_OK;
 }
 
+static esp_err_t scd40_set_temperature_offset(uint16_t offset_ticks) {
+    // This command requires a 16-bit argument (offset_ticks) and a CRC.
+    // Total payload is 5 bytes: [cmd_msb, cmd_lsb, arg_msb, arg_lsb, crc]
+    uint8_t buf[5];
+    uint16_t cmd = SCD4X_CMD_SET_TEMP_OFFSET;
+
+    // Command
+    buf[0] = (uint8_t)(cmd >> 8);
+    buf[1] = (uint8_t)(cmd & 0xFF);
+
+    // Argument (the offset in ticks)
+    buf[2] = (uint8_t)(offset_ticks >> 8);
+    buf[3] = (uint8_t)(offset_ticks & 0xFF);
+
+    // CRC for the argument
+    buf[4] = scd_crc8(&buf[2]); // CRC is calculated over the argument bytes only
+
+    return i2c_master_write_to_device(I2C_MASTER_NUM, SCD40_I2C_ADDR,
+                                      buf, sizeof(buf), pdMS_TO_TICKS(50));
+}
+
+/**
+ * @brief Sets the sensor altitude compensation in meters.
+ *
+ * @param altitude_meters The altitude in meters above sea level.
+ * @return esp_err_t ESP_OK on success.
+ */
+static esp_err_t scd40_set_altitude(uint16_t altitude_meters) {
+    // This command requires a 16-bit argument (altitude) and a CRC.
+    // Total payload is 5 bytes: [cmd_msb, cmd_lsb, arg_msb, arg_lsb, crc]
+    uint8_t buf[5];
+    uint16_t cmd = SCD4X_CMD_SET_SENSOR_ALTITUDE;
+
+    // Command
+    buf[0] = (uint8_t)(cmd >> 8);
+    buf[1] = (uint8_t)(cmd & 0xFF);
+
+    // Argument (the altitude in meters)
+    buf[2] = (uint8_t)(altitude_meters >> 8);
+    buf[3] = (uint8_t)(altitude_meters & 0xFF);
+
+    // CRC for the argument
+    buf[4] = scd_crc8(&buf[2]); // CRC is calculated over the argument bytes only
+
+    return i2c_master_write_to_device(I2C_MASTER_NUM, SCD40_I2C_ADDR,
+                                      buf, sizeof(buf), pdMS_TO_TICKS(50));
+}
+
 esp_err_t scd40_init(void) {
     // Some boards need a moment after power-up
     vTaskDelay(pdMS_TO_TICKS(50));
 
     scd40_wake();                                  // best-effort, ignore error
     (void) scd40_stop();                            // ignore in case not measuring
-    vTaskDelay(pdMS_TO_TICKS(5));
+    vTaskDelay(pdMS_TO_TICKS(500));
     ESP_RETURN_ON_ERROR(scd40_reinit(), TAG_SCD40, "reinit");
     vTaskDelay(pdMS_TO_TICKS(20));
-    ESP_RETURN_ON_ERROR(scd40_start(), TAG_SCD40, "start");
+
+    // Calculate the offset in ticks from the Celsius value.
+    // The formula is (offset_in_celsius * 65536) / 175
+    uint16_t offset_ticks = (uint16_t)((1.23 * 65536.0f) / 175.0f);
+    ESP_LOGI(TAG_SCD40, "Applying temperature offset of %.2f°C (%u ticks)", 1.23, offset_ticks);
+    ESP_RETURN_ON_ERROR(scd40_set_temperature_offset(offset_ticks), TAG_SCD40, "set temp offset failed");
+    vTaskDelay(pdMS_TO_TICKS(5));
+
+    // --- SET ALTITUDE ---
+    uint16_t altitude_m = 15; // Altitude for Flushing, NY
+    ESP_LOGI(TAG_SCD40, "Applying altitude of %u meters", altitude_m);
+    ESP_RETURN_ON_ERROR(scd40_set_altitude(altitude_m), TAG_SCD40, "set altitude failed");
+    vTaskDelay(pdMS_TO_TICKS(5));
+
+    ESP_RETURN_ON_ERROR(scd40_start(), TAG_SCD40, "start failed");
+
+
+
     return ESP_OK;
 }
+

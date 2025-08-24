@@ -24,13 +24,13 @@
 #define I2C_MASTER_NUM       I2C_NUM_0
 #endif
 #ifndef I2C_MASTER_SCL_IO
-#define I2C_MASTER_SCL_IO    22
+#define I2C_MASTER_SCL_IO    16
 #endif
 #ifndef I2C_MASTER_SDA_IO
-#define I2C_MASTER_SDA_IO    21
+#define I2C_MASTER_SDA_IO    17
 #endif
 #ifndef I2C_MASTER_FREQ_HZ
-#define I2C_MASTER_FREQ_HZ   100000
+#define I2C_MASTER_FREQ_HZ   400000
 #endif
 #ifndef ENS160_SENSOR_ADDR
 #define ENS160_SENSOR_ADDR   0x53   // (ADDR/SMD pad decides 0x52 or 0x53)
@@ -52,6 +52,8 @@
 #define SCD40_VAL_TEMP_C_X100   1   // int: °C * 100
 #define SCD40_VAL_RH_X100       2   // int: % * 100
 #define SCD40_VALS_COUNT        3
+#define SCD4X_CMD_SET_TEMP_OFFSET      0x241D
+#define SCD4X_CMD_SET_SENSOR_ALTITUDE  0x2427
 
 esp_err_t scd40_start(void);   // start periodic measurement (~5s updates)
 esp_err_t scd40_stop(void);    // stop periodic measurement
@@ -77,3 +79,4 @@ esp_err_t ens160_read_string(char *out, size_t out_len);
 esp_err_t ens160_log_once(char *out, size_t out_len);
 // SCD40 init: wake -> stop -> reinit -> start (safe sequence)
 esp_err_t scd40_init(void);
+

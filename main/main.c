@@ -13,6 +13,8 @@
 #include "esp_log.h"
 #include "i2chelper.h"
 
+esp_err_t wifi_connect_start(const char *ssid_opt, const char *pass_opt, TickType_t wait_ticks);
+
 // A new, slow, but reliable function to draw a BMP pixel-by-pixel
 void display_bmp_slowly(TFT_t *dev, const char *filename) {
     FILE *f = fopen(filename, "r");
@@ -167,10 +169,10 @@ static const char *validity_strs[4] = {"normal","warm-up","initial","invalid"};
 
 int last_ens[ENS160_VALS_COUNT] = {-1,-1,-1,-1};
 int last_scd[SCD40_VALS_COUNT]   = {-1,-1,-1};
-
 TickType_t next_scd = 0;  // schedule next SCD40 poll
 
-
+// Wait up to 20 seconds for IP
+ESP_ERROR_CHECK( wifi_connect_start(NULL, NULL, pdMS_TO_TICKS(20000)) );
 
 ESP_ERROR_CHECK(scd40_init());   // SCD40 begins periodic measurements (~5 s cadence)
 
@@ -180,24 +182,24 @@ while (1) {
     TickType_t now = xTaskGetTickCount(); 
     if (ens160_read_values(vals) == ESP_OK) {
         if (vals[ENS160_VAL_AQI] != last_ens[ENS160_VAL_AQI]) {
-            snprintf((char*)buf, sizeof(buf), "AQI: %d", vals[ENS160_VAL_AQI]);
-            draw_line(&dev, fx, 0, 16, (char*)buf, WHITE, BLACK);
+            snprintf((char*)buf, sizeof(buf), "AQI: %d     ", vals[ENS160_VAL_AQI]);
+            draw_line(&dev, fx, 0, 0, (char*)buf, WHITE, BLACK);
             last_ens[ENS160_VAL_AQI] = vals[ENS160_VAL_AQI];
         }
         if (vals[ENS160_VAL_TVOC_PPB] != last_ens[ENS160_VAL_TVOC_PPB]) {
             snprintf((char*)buf, sizeof(buf), "TVOC: %d ppb", vals[ENS160_VAL_TVOC_PPB]);
-            draw_line(&dev, fx, 0, 32, (char*)buf, WHITE, BLACK);
+            draw_line(&dev, fx, 0, 16, (char*)buf, WHITE, BLACK);
             last_ens[ENS160_VAL_TVOC_PPB] = vals[ENS160_VAL_TVOC_PPB];
         }
         if (vals[ENS160_VAL_ECO2_PPM] != last_ens[ENS160_VAL_ECO2_PPM]) {
             snprintf((char*)buf, sizeof(buf), "eCO2: %d ppm", vals[ENS160_VAL_ECO2_PPM]);
-            draw_line(&dev, fx, 0, 48, (char*)buf, WHITE, BLACK);
+            draw_line(&dev, fx, 0, 32, (char*)buf, WHITE, BLACK);
             last_ens[ENS160_VAL_ECO2_PPM] = vals[ENS160_VAL_ECO2_PPM];
         }
         if (vals[ENS160_VAL_VALIDITY] != last_ens[ENS160_VAL_VALIDITY]) {
             snprintf((char*)buf, sizeof(buf), "Status: %s",
                      validity_strs[vals[ENS160_VAL_VALIDITY] & 3]);
-            draw_line(&dev, fx, 0, 64, (char*)buf, WHITE, BLACK);
+            draw_line(&dev, fx, 0, 48, (char*)buf, WHITE, BLACK);
             last_ens[ENS160_VAL_VALIDITY] = vals[ENS160_VAL_VALIDITY];
         }
     } else {
@@ -212,20 +214,20 @@ while (1) {
             char buf[40];
 
             if (s[SCD40_VAL_CO2_PPM] != last_scd[SCD40_VAL_CO2_PPM]) {
-                snprintf(buf, sizeof(buf), "CO2: %d ppm", s[SCD40_VAL_CO2_PPM]);
-                draw_line(&dev, fx, 0, 79, buf, WHITE, BLACK);
+                snprintf(buf, sizeof(buf), "CO2: %d ppm     ", s[SCD40_VAL_CO2_PPM]);
+                draw_line(&dev, fx, 0, 80, buf, WHITE, BLACK);
                 last_scd[SCD40_VAL_CO2_PPM] = s[SCD40_VAL_CO2_PPM];
             }
             if (s[SCD40_VAL_TEMP_C_X100] != last_scd[SCD40_VAL_TEMP_C_X100]) {
                 int t = s[SCD40_VAL_TEMP_C_X100];
                 snprintf(buf, sizeof(buf), "T: %d.%02d C", t/100, abs(t)%100);
-                draw_line(&dev, fx, 0, 95, buf, WHITE, BLACK);
+                draw_line(&dev, fx, 0, 96, buf, WHITE, BLACK);
                 last_scd[SCD40_VAL_TEMP_C_X100] = s[SCD40_VAL_TEMP_C_X100];
             }
             if (s[SCD40_VAL_RH_X100] != last_scd[SCD40_VAL_RH_X100]) {
                 int rh = s[SCD40_VAL_RH_X100];
                 snprintf(buf, sizeof(buf), "RH: %d.%02d %%", rh/100, rh%100);
-                draw_line(&dev, fx, 0, 111, buf, WHITE, BLACK);
+                draw_line(&dev, fx, 0, 112, buf, WHITE, BLACK);
                 last_scd[SCD40_VAL_RH_X100] = s[SCD40_VAL_RH_X100];
             }
         } else {
@@ -234,7 +236,5 @@ while (1) {
         next_scd = now + pdMS_TO_TICKS(5100);
     }
 
-    // Give time to other tasks/WDT
-    vTaskDelay(pdMS_TO_TICKS(50));
 }
 }
