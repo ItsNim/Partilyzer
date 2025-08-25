@@ -131,6 +131,7 @@ static void draw_line(TFT_t *dev, FontxFile *fx,
 
 void app_main(void)
 {
+    vTaskDelay(pdMS_TO_TICKS(10000));
     init_spiffs();
     TFT_t dev;
     FontxFile fx[2];
@@ -145,15 +146,25 @@ void app_main(void)
                     CONFIG_DC_GPIO,
                     CONFIG_RESET_GPIO,
                     CONFIG_BL_GPIO);
+    spi_clock_speed(80000000);
+
+    lcdInit(&dev, CONFIG_WIDTH, CONFIG_HEIGHT, 0, 80);
+    lcdFillScreen(&dev, BLACK);
+
     lcdInit(&dev, CONFIG_WIDTH, CONFIG_HEIGHT, 0, 0);
+    lcdFillScreen(&dev, BLACK);
+
     lcdInversionOff(&dev);
     // Clear screen
-    lcdFillScreen(&dev, BLACK);
 
     // Load the font file (from your project directory)
     InitFontx(fx, "/spiffs/ILGH16XB.FNT", "");
     lcdSetFontDirection(&dev, 0);
     lcdSetFontFill(&dev, true);           // fill behind each glyph
+
+    vTaskDelay(pdMS_TO_TICKS(1200));  // match sensor cadence
+
+
     //lcdSetFontFillColor(&dev, BLACK);     // background color
 
     // Set text direction and draw string
