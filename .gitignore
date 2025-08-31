@@ -39,3 +39,24 @@
 
 # debug information files
 *.dwo
+
+# ESP-IDF
+build/
+sdkconfig
+
+# VS Code
+.vscode/
+
+# Build artifacts
+*.bin
+*.elf
+*.map
+*.o
+*.a
+CMakeLists.txt.old
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+dependencies.lock

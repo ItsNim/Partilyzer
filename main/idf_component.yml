@@ -1,0 +1,4 @@
+dependencies:
+  nopnop2002/st7789:
+    path: components/st7789/
+    git: https://github.com/nopnop2002/esp-idf-st7789.git
